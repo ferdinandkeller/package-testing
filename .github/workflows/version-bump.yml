@@ -1,10 +1,10 @@
-name: Version Bump
+name: Release Package
 
 on:
   workflow_dispatch:
     inputs:
       bump_type:
-        description: 'Type of version bump'
+        description: 'Version Bump Type'
         required: true
         type: choice
         options:
@@ -116,6 +116,16 @@ jobs:
       - name: Create Pull Request
         run: |
           BRANCH_NAME="${{ env.branch_name }}"
-          curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -d "{\"title\":\"Update generated content\", \"head\":\"$BRANCH_NAME\", \"base\":\"main\", \"body\":\"Automated PR to update generated content\"}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls
+          PR_RESPONSE=$(curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d "{\"title\":\"Bump version to ${{ steps.version.outputs.new }}\", \"head\":\"$BRANCH_NAME\", \"base\":\"main\", \"body\":\"Bump version from ${{ steps.version.outputs.current }} to ${{ steps.version.outputs.new }}\"}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls)
+          PR_NUMBER=$(echo "$PR_RESPONSE" | jq -r .number)
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_ENV
+
+      - name: Merge Pull Request
+        run: |
+          BRANCH_NAME="${{ env.branch_name }}"
+          PR_NUMBER="${{ env.pr_number }}"
+          curl -s -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d "{\"commit_title\":\"Merge PR for version bump\", \"merge_method\":\"squash\"}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/merge
