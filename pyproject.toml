@@ -1,6 +1,6 @@
 [project]
 name = "package-testing"
-version = "0.4.0"
+version = "0.4.1"
 description = "Testing library."
 authors = [{ name = "Ferdinand Keller", email = "ferdinand.keller@proton.me" }]
 readme = "README.md"
