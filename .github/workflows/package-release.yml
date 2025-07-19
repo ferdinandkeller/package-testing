@@ -11,8 +11,9 @@ on:
           - patch
           - minor
           - major
+
 jobs:
-  bump-and-tag:
+  package-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
