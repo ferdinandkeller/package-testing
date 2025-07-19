@@ -1,0 +1,29 @@
+{
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    "features": {
+        "ghcr.io/jsburckhardt/devcontainer-features/uv:1": {},
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/guiyomh/features/just:0": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "tamasfe.even-better-toml",
+                "fill-labs.dependi",
+                "charliermarsh.ruff",
+                "nefrob.vscode-just-syntax"
+            ]
+        }
+    },
+    "containerEnv": {
+        "PYRIGHT_PYTHON_FORCE_VERSION": "latest"
+    },
+    "remoteEnv": {
+        "PYTHONPATH": "${containerWorkspaceFolder}/src:${containerEnv:PYTHONPATH}"
+    },
+    "onCreateCommand": "./scripts/setup.sh"
+}
