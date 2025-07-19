@@ -1,0 +1,43 @@
+[project]
+name = "package-testing"
+version = "0.1.0"
+description = "Testing library."
+authors = [{ name = "Ferdinand Keller", email = "ferdinand.keller@proton.me" }]
+readme = "README.md"
+requires-python = "==3.13.*"
+dependencies = ["typeguard>=4.4.3"]
+
+[dependency-groups]
+dev = ["ruff>=0.11.13", "pyright>=1.1.403"]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+include = ["src/**"]
+
+[tool.ruff.lint]
+preview = true
+explicit-preview-rules = true
+select = [
+    "ALL",  # we want to be as strict as possible
+    "W391", # no blank line at end of file (experimental)
+]
+ignore = [
+    "D203",    # 1 blank line required before class docstring
+    "D212",    # multi-line docstring summary should start at the first line
+    "COM812",  # missing trailing comma in a tuple (redundant with formatter)
+    "TC003",   # typing only imports should be in TYPE_CHECKING block
+    "PLC0414", # re-export name
+]
+flake8-quotes = { inline-quotes = 'single', multiline-quotes = 'double' }
+pydocstyle = { convention = 'google' }
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true
+
+[tool.pyright]
+python_version = "3.13"
+strict = ["src"]
