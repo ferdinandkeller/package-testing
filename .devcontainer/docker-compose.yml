@@ -1,0 +1,11 @@
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:noble
+    volumes:
+      - ../..:/workspaces:cached
+    networks:
+      - package-testing
+    command: sleep infinity
+
+networks:
+  package-testing:
