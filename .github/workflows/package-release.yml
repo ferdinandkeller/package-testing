@@ -56,23 +56,6 @@ jobs:
           echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
           
-      # - name: Create feature branch
-      #   run: |
-      #     BRANCH_NAME="bump/version-${{ steps.version.outputs.new }}"
-      #     git checkout -b "$BRANCH_NAME"
-      #     echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-
-      # - name: Commit version bump
-      #   run: |
-      #     git config --local user.email "action@github.com"
-      #     git config --local user.name "GitHub Action"
-      #     git add pyproject.toml uv.lock
-      #     git commit -m "Bump version from ${{ steps.version.outputs.current }} to ${{ steps.version.outputs.new }}"
-
-      # - name: Push feature branch
-      #   run: |
-      #     git push origin "${{ env.BRANCH_NAME }}"
-
       - name: Get main branch commit SHA
         id: get_sha
         run: |
@@ -135,11 +118,6 @@ jobs:
           curl -s -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/git/refs/heads/$BRANCH_NAME
 
-      # - name: Get main branch commit SHA
-      #   run: |
-      #     SHA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs/heads/main | jq -r .object.sha)
-      #     echo "sha=$SHA" >> $GITHUB_ENV
-
       - name: Create Version Tag
         run: |
           TAG_NAME="v${{ steps.version.outputs.new }}"
@@ -153,28 +131,3 @@ jobs:
           curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -d "{\"event_type\":\"build-package\", \"client_payload\":{\"ref\":\"refs/tags/$TAG_NAME\"}}" \
             https://api.github.com/repos/${{ github.repository }}/dispatches
-
-
-      # - name: Create Version Tag
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-      #   run: |
-      #     TAG_NAME="v${{ steps.version.outputs.new }}"
-      #     git reset --hard HEAD
-      #     git pull
-      #     git config --local user.email "action@github.com"
-      #     git config --local user.name "GitHub Action"
-      #     git tag -a "$TAG_NAME" -m "Release version $TAG_NAME"
-      #     git push origin "$TAG_NAME"
-
-      # - name: Create Version Tag
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     TAG_NAME="v${{ steps.version.outputs.new }}"
-      #     git checkout main
-      #     git pull origin main
-      #     git config --local user.email "action@github.com"
-      #     git config --local user.name "GitHub Action"
-      #     git tag -a "$TAG_NAME" -m "Release version $TAG_NAME"
-      #     git push https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git "$TAG_NAME"
