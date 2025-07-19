@@ -8,16 +8,12 @@ on:
     types: [build-package]
 
 jobs:
-  build-and-push:
+  package-build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-      - name: Echo client_payload
-        run: |
-          echo "Client payload: ${{ toJson(github.event.client_payload) }}"
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
