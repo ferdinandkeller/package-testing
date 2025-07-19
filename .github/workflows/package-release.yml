@@ -127,5 +127,11 @@ jobs:
           BRANCH_NAME="${{ env.branch_name }}"
           PR_NUMBER="${{ env.pr_number }}"
           curl -s -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -d "{\"commit_title\":\"Merge PR for version bump\", \"merge_method\":\"squash\"}" \
+            -d "{\"commit_title\":\"Bump version to ${{ steps.version.outputs.new }} #$PR_NUMBER\", \"merge_method\":\"squash\"}" \
             https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/merge
+
+      - name: Delete Bump Branch
+        run: |
+          BRANCH_NAME="${{ env.branch_name }}"
+          curl -s -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/git/refs/heads/$BRANCH_NAME
