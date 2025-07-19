@@ -3,7 +3,7 @@ name: Build Python Package (dummy)
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - "v[0-9]+.[0-9]+.[0-9]+*"
   repository_dispatch:
     types: [build-package]
 
@@ -15,8 +15,9 @@ jobs:
 
     steps:
       - name: Echo client_payload
-        run: echo "Client payload: ${{ toJson(github.event.client_payload) }}"
-        
+        run: |
+          echo "Client payload: ${{ toJson(github.event.client_payload) }}"
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
