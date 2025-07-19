@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
+  repository_dispatch:
+    types: [build-package]
 
 jobs:
   build-and-push:
@@ -14,3 +16,5 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.client_payload.ref || github.ref }}
