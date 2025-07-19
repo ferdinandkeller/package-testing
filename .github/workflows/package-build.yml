@@ -15,7 +15,7 @@ jobs:
 
     steps:
     - name: Echo client_payload
-      run: echo "Client payload: ${{ toJson(github.event.client_payload) }}"
+      run: echo "Client payload: ${{ github.event.client_payload }}"
       
     - name: Checkout code
       uses: actions/checkout@v4
