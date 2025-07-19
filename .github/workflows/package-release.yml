@@ -151,8 +151,8 @@ jobs:
       - name: Create Version Tag
         run: |
           TAG_NAME="v${{ steps.version.outputs.new }}"
-          git checkout main
-          git pull origin main
+          git reset --hard HEAD
+          git pull
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git tag -a "$TAG_NAME" -m "Release version $TAG_NAME"
