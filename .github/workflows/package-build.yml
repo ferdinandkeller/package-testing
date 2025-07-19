@@ -14,7 +14,10 @@ jobs:
       contents: read
 
     steps:
+    - name: Echo client_payload
+      run: echo "Client payload: ${{ toJson(github.event.client_payload) }}"
+      
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        ref: ${{ github.event.client_payload.ref || github.ref }}
+        ref: "${{ github.event.client_payload.ref != '' && github.event.client_payload.ref || github.ref }}"
