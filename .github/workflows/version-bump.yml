@@ -56,11 +56,38 @@ jobs:
           echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
           
-      - name: Create feature branch
+      # - name: Create feature branch
+      #   run: |
+      #     BRANCH_NAME="bump/version-${{ steps.version.outputs.new }}"
+      #     git checkout -b "$BRANCH_NAME"
+      #     echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+
+      # - name: Commit version bump
+      #   run: |
+      #     git config --local user.email "action@github.com"
+      #     git config --local user.name "GitHub Action"
+      #     git add pyproject.toml uv.lock
+      #     git commit -m "Bump version from ${{ steps.version.outputs.current }} to ${{ steps.version.outputs.new }}"
+
+      # - name: Push feature branch
+      #   run: |
+      #     git push origin "${{ env.BRANCH_NAME }}"
+
+      - name: Get main branch commit SHA
+        id: get_sha
+        run: |
+          SHA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs/heads/main | jq -r .object.sha)
+          echo "sha=$SHA" >> $GITHUB_ENV
+
+      - name: Create new branch
+        id: create_branch
         run: |
           BRANCH_NAME="bump/version-${{ steps.version.outputs.new }}"
-          git checkout -b "$BRANCH_NAME"
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_ENV
+          curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d "{\"ref\":\"refs/heads/$BRANCH_NAME\", \"sha\":\"${{ env.sha }}\"}" \
+            https://api.github.com/repos/${{ github.repository }}/git/refs
 
       - name: Bump version in pyproject.toml
         run: |
@@ -70,22 +97,25 @@ jobs:
         run: |
           uv sync
 
-      - name: Commit version bump
+      - name: Commit changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add pyproject.toml uv.lock
-          git commit -m "Bump version from ${{ steps.version.outputs.current }} to ${{ steps.version.outputs.new }}"
-
-      - name: Push feature branch
-        run: |
-          git push origin "${{ env.BRANCH_NAME }}"
+          BRANCH_NAME="${{ env.branch_name }}"
+          FILES_CHANGED=$(git status --porcelain | awk '{print $2}')
+          for file in $FILES_CHANGED; do
+            CONTENT=$(base64 -w 0 $file)
+            FILENAME=$(basename $file)
+            SHA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/contents/$file?ref=$BRANCH_NAME | jq -r .sha)
+            if [ "$SHA" == "null" ]; then
+              SHA=""
+            fi
+            curl -s -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -d "{\"message\":\"Update $FILENAME\", \"content\":\"$CONTENT\", \"branch\":\"$BRANCH_NAME\", \"sha\":\"$SHA\"}" \
+              https://api.github.com/repos/${{ github.repository }}/contents/$file
+          done
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          title: "Bump version to ${{ steps.version.outputs.new }}"
-          body: "This PR bumps the version from `${{ steps.version.outputs.current }}` to `${{ steps.version.outputs.new }}`."
-          head: "${{ env.BRANCH_NAME }}"
-          base: "main"
-          author: "GitHub Action <action@github.com>"
+        run: |
+          BRANCH_NAME="${{ env.branch_name }}"
+          curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d "{\"title\":\"Update generated content\", \"head\":\"$BRANCH_NAME\", \"base\":\"main\", \"body\":\"Automated PR to update generated content\"}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls
