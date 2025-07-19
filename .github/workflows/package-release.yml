@@ -137,7 +137,6 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/git/refs/heads/$BRANCH_NAME
 
       - name: Get main branch commit SHA
-        id: get_sha
         run: |
           SHA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/${{ github.repository }}/git/refs/heads/main | jq -r .object.sha)
           echo "sha=$SHA" >> $GITHUB_ENV
