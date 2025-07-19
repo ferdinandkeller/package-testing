@@ -128,6 +128,7 @@ jobs:
 
       - name: Trigger build workflow
         run: |
+          TAG_NAME="v${{ steps.version.outputs.new }}"
           curl -s -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -d "{\"event_type\":\"build-package\", \"client_payload\":{\"ref\":\"refs/tags/$TAG_NAME\"}}" \
             https://api.github.com/repos/${{ github.repository }}/dispatches
